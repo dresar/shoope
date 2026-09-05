@@ -1,0 +1,30 @@
+{
+  "queries": {
+    "pompa": {
+      "reason": "Rekomendasi untuk \"pompa\"",
+      "productIds": [
+        "prod_1786903833713_kice"
+      ],
+      "products": [
+        {
+          "id": "prod_1786903833713_kice",
+          "spillNumber": "04",
+          "title": "Pompa Galon Elektrik Kabel Type C Smart Pumping Unit...",
+          "description": "Beli Pompa Galon Elektrik Kabel Type C Smart Pumping Unit Rechargerable Pompa Galon Garansi 1 Tahun RELTON Terbaru Harga Murah di Shopee. Ada Gratis Ongkir, Promo COD, &amp; Cashback. Cek Review Produk Terlengkap",
+          "category": "Barang Unik",
+          "tags": [],
+          "imageUrl": "https://down-id.img.susercontent.com/file/id-11134207-822wr-mo92jcu9ymmc5a",
+          "affiliateUrl": "https://s.shopee.co.id/8Kol6NWEUO",
+          "buttonText": "Beli di Shopee",
+          "isFeatured": true,
+          "clicks": 1,
+          "createdAt": "2026-08-16T18:10:33.713Z"
+        }
+      ]
+    }
+  },
+  "stats": {
+    "totalHits": 3,
+    "savedApiCalls": 1
+  }
+}

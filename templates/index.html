@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Video Automation Engine • Studio Pro</title>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#ee4d2d', // Shopee Primary Orange
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                            950: '#431407',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-orange': '0 0 25px -5px rgba(238, 77, 45, 0.4)',
+                        'neon-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #07090e;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(238, 77, 45, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(14, 165, 233, 0.06) 0%, transparent 40%),
+                linear-gradient(to bottom, #07090e, #0a0d14);
+            color: #f1f5f9;
+        }
+
+        .glass-panel {
+            background: rgba(15, 20, 28, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .glass-panel-glow {
+            background: rgba(15, 20, 28, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(238, 77, 45, 0.25);
+            box-shadow: 0 0 35px -8px rgba(238, 77, 45, 0.15);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(51, 65, 85, 0.8);
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(238, 77, 45, 0.8);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scrollbar select-none text-slate-200">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="relative group cursor-pointer">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 via-orange-500 to-amber-400 flex items-center justify-center shadow-neon-orange group-hover:scale-105 transition duration-300">
+                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                </div>
+                <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#090b10] animate-pulse"></span>
+            </div>
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+                        SHOPEE VIDEO <span class="bg-gradient-to-r from-brand-400 to-amber-300 bg-clip-text text-transparent">STUDIO PRO</span>
+                    </h1>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/30 tracking-wide uppercase">
+                        Mobile Automation v3.0
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-400 font-medium">Dual-Mode Affiliate (Link Import & Tab Semua) • 30 FPS Live Stream • Auto 720p HD</p>
+            </div>
+        </div>
+
+        <!-- System Status & Quick Actions -->
+        <div class="flex items-center gap-3">
+            <!-- Device Status Pill -->
+            <div id="deviceStatusBadge" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                <span class="text-slate-300">Menghubungkan HP...</span>
+            </div>
+
+            <!-- Scrcpy 30 FPS Launcher -->
+            <button onclick="launchScrcpy()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-orange-500 hover:from-brand-600 hover:to-orange-600 text-white text-xs font-bold shadow-neon-orange transition-all duration-200 flex items-center gap-2 hover:scale-[1.02] active:scale-95">
+                <i class="fa-solid fa-display"></i>
+                <span>Buka Layar HP (30 FPS)</span>
+            </button>
+
+            <!-- Reconnect & Screenshot -->
+            <button onclick="reconnectDevice()" title="Reconnect ADB" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition">
+                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+            </button>
+            <button onclick="refreshScreen()" title="Take Screenshot" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition">
+                <i class="fa-solid fa-camera text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <main class="flex-1 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1900px] w-full mx-auto">
+
+        <!-- Left Column: Video Batch Control & Queue (7 Cols) -->
+        <div class="xl:col-span-7 flex flex-col gap-5">
+            
+            <!-- Statistics Banner Cards -->
+            <div class="grid grid-cols-4 gap-3.5">
+                <div class="glass-panel rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-brand-500">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-400 text-base">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Video</p>
+                        <h3 id="statTotal" class="text-xl font-extrabold text-white">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-amber-500">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-base">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Antrean</p>
+                        <h3 id="statQueue" class="text-xl font-extrabold text-white">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-emerald-500">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-base">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Sukses</p>
+                        <h3 id="statSuccess" class="text-xl font-extrabold text-emerald-400">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-rose-500">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 text-base">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Gagal</p>
+                        <h3 id="statFailed" class="text-xl font-extrabold text-rose-400">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Source Card -->
+            <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-brand-500 text-sm"></i>
+                        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Sumber Video & Scanner</h2>
+                    </div>
+                    <!-- Source Tabs -->
+                    <div class="flex items-center p-1 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <button id="tabFolderBtn" onclick="switchTab('folder')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-500 text-white shadow-sm transition flex items-center gap-2">
+                            <i class="fa-regular fa-folder-open"></i> Pindai Folder PC
+                        </button>
+                        <button id="tabUploadBtn" onclick="switchTab('upload')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Manual MP4
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Folder Section -->
+                <div id="folderSection" class="flex gap-2.5">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-folder absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
+                        <input type="text" id="folderPathInput" value="C:\Users\NCN0C\Music\editor_berkelas\shoope\18" placeholder="Masukkan path folder video..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500 font-mono transition">
+                    </div>
+                    <button onclick="scanFolder()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-orange-500 hover:from-brand-600 hover:to-orange-600 text-white text-xs font-bold shadow-neon-orange transition-all flex items-center gap-2 shrink-0">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Pindai Folder</span>
+                    </button>
+                </div>
+
+                <!-- Upload Section (Hidden) -->
+                <div id="uploadSection" class="hidden">
+                    <div class="border-2 border-dashed border-slate-800 hover:border-brand-500/60 rounded-2xl p-6 text-center transition cursor-pointer bg-slate-950/40 group" onclick="document.getElementById('fileUploadInput').click()">
+                        <i class="fa-solid fa-file-video text-3xl text-slate-600 group-hover:text-brand-400 group-hover:scale-110 transition duration-200 mb-2"></i>
+                        <p class="text-xs font-semibold text-slate-300">Klik untuk memilih file video (.mp4, .mov) atau seret ke sini</p>
+                        <p class="text-[10px] text-slate-500 mt-1">Multi-upload didukung. Resolusi di bawah 720p otomatis di-upscale HD.</p>
+                        <input type="file" id="fileUploadInput" multiple accept="video/*" class="hidden" onchange="handleFileUpload(this.files)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Queue List Card -->
+            <div class="glass-panel rounded-2xl p-5 flex-1 flex flex-col min-h-[460px]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-list-check text-brand-500 text-sm"></i>
+                        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Antrean Upload Batch</h2>
+                        <span id="queueCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">0</span>
+                    </div>
+
+                    <!-- Batch Controls -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="clearQueue()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can"></i> Bersihkan
+                        </button>
+                        <button id="startBatchBtn" onclick="startBatchUpload()" class="px-5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs font-bold shadow-neon-emerald transition-all flex items-center gap-2 hover:scale-[1.02]">
+                            <i class="fa-solid fa-play"></i> Mulai Batch Upload
+                        </button>
+                        <button id="stopBatchBtn" onclick="stopBatchUpload()" class="hidden px-5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all flex items-center gap-2 animate-pulse">
+                            <i class="fa-solid fa-stop"></i> Hentikan Batch
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video Queue Container -->
+                <div id="queueList" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 max-h-[500px] pr-1">
+                    <!-- Empty State -->
+                    <div id="emptyQueueState" class="flex flex-col items-center justify-center py-20 text-slate-500">
+                        <div class="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-video-slash text-2xl text-slate-600"></i>
+                        </div>
+                        <p class="text-xs font-bold text-slate-400">Belum ada video dalam antrean</p>
+                        <p class="text-[10px] text-slate-600 mt-1">Pindai folder atau drag-and-drop file video di atas untuk memulai</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live Monitor, 12-Step Progress, & Real-time Console Logs (5 Cols) -->
+        <div class="xl:col-span-5 flex flex-col gap-5">
+            
+            <!-- Live Monitor & Step Tracker Card -->
+            <div class="glass-panel-glow rounded-2xl p-5 flex flex-col items-center relative overflow-hidden">
+                <div class="w-full flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Live Screen Monitor</h2>
+                    </div>
+                    <span id="currentStepBadge" class="text-[11px] font-bold text-brand-400 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 tracking-wide">
+                        STANDBY
+                    </span>
+                </div>
+
+                <!-- Phone Frame Container -->
+                <div class="relative rounded-3xl overflow-hidden border-4 border-slate-800/90 bg-black shadow-2xl flex items-center justify-center w-full aspect-[9/16] max-w-[240px] group">
+                    <!-- High-Speed Real-time MJPEG Video Feed -->
+                    <img id="liveScreenImg" src="/api/stream.mjpg" alt="Live Phone Stream" class="w-full h-full object-contain bg-black" onerror="this.src='/screenshots/link_import_07_after_tambah.png'">
+                    
+                    <!-- Loading Action Overlay -->
+                    <div id="screenOverlayLoader" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center text-white text-xs gap-3">
+                        <div class="w-10 h-10 rounded-full border-2 border-brand-500 border-t-transparent animate-spin"></div>
+                        <span class="font-semibold text-brand-300">Eksekusi Otomasi...</span>
+                    </div>
+
+                    <!-- Live Watermark -->
+                    <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[9px] font-bold text-emerald-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> LIVE
+                    </div>
+                </div>
+
+                <!-- Current Step Title & Detail -->
+                <div class="w-full text-center mt-3.5">
+                    <h4 id="stepTitleLabel" class="text-xs font-bold text-slate-200">Menunggu Tugas Dimulai</h4>
+                    <p id="stepDescriptionLabel" class="text-[11px] text-slate-500 mt-0.5">Pilih video dan klik Mulai Batch Upload untuk menjalankan otomasi</p>
+                </div>
+            </div>
+
+            <!-- Real-time Console Logs Terminal -->
+            <div class="glass-panel rounded-2xl p-5 flex-1 flex flex-col min-h-[300px]">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-terminal text-emerald-400 text-xs"></i>
+                        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-200">Live Execution Terminal</h2>
+                    </div>
+                    <button onclick="clearLogs()" class="text-[11px] text-slate-500 hover:text-slate-300 transition flex items-center gap-1">
+                        <i class="fa-solid fa-eraser"></i> Bersihkan Log
+                    </button>
+                </div>
+
+                <div id="logContainer" class="flex-1 bg-slate-950/90 rounded-xl p-3.5 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar max-h-[280px] flex flex-col gap-1.5 border border-slate-900">
+                    <div class="text-slate-600">[System] Real-time WebSocket Logging Engine siap.</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let ws = null;
+        let queue = [];
+        let isBatchRunning = false;
+
+        function connectWebSocket() {
+            const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${proto}//${window.location.host}/ws`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                logMessage('success', 'WebSocket terkoneksi ke backend Shopee Video Studio.');
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    handleWsEvent(msg);
+                } catch (e) {
+                    console.error('Error parsing WS message:', e);
+                }
+            };
+
+            ws.onclose = () => {
+                logMessage('warning', 'WebSocket terputus. Mencoba rekoneksi dalam 3 detik...');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        function handleWsEvent(msg) {
+            const { type, data } = msg;
+
+            if (type === 'device_status') {
+                updateDeviceStatus(data);
+            } else if (type === 'log') {
+                logMessage(data.level, data.message);
+            } else if (type === 'step') {
+                document.getElementById('currentStepBadge').innerText = `STEP ${data.step}/12`;
+                document.getElementById('stepTitleLabel').innerText = data.title;
+                document.getElementById('stepDescriptionLabel').innerText = data.desc;
+            } else if (type === 'video_start') {
+                if (queue[data.index]) {
+                    queue[data.index].status = 'running';
+                    renderQueue();
+                }
+                logMessage('info', `>>> [${data.index + 1}/${data.total}] Mengunggah ${data.video}...`);
+            } else if (type === 'video_complete') {
+                if (queue[data.index]) {
+                    queue[data.index].status = data.status;
+                    renderQueue();
+                    updateStats();
+                }
+            } else if (type === 'batch_complete') {
+                setBatchRunningState(false);
+                document.getElementById('currentStepBadge').innerText = 'SELESAI';
+                document.getElementById('stepTitleLabel').innerText = 'Batch Upload Selesai';
+                document.getElementById('stepDescriptionLabel').innerText = `Berhasil mengunggah ${data.success_count} dari ${data.total} video.`;
+                logMessage('success', `🎉 Batch selesai! Berhasil: ${data.success_count}/${data.total} video.`);
+            }
+        }
+
+        function logMessage(level, text) {
+            const container = document.getElementById('logContainer');
+            const row = document.createElement('div');
+            const timeStr = new Date().toLocaleTimeString();
+
+            let colorClass = 'text-slate-300';
+            if (level === 'success') colorClass = 'text-emerald-400 font-semibold';
+            if (level === 'error') colorClass = 'text-rose-400 font-semibold';
+            if (level === 'warning') colorClass = 'text-amber-400';
+            if (level === 'info') colorClass = 'text-brand-300';
+
+            row.className = `${colorClass} leading-relaxed break-words`;
+            row.innerHTML = `<span class="text-slate-600">[${timeStr}]</span> ${text}`;
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '';
+        }
+
+        function updateDeviceStatus(data) {
+            const badge = document.getElementById('deviceStatusBadge');
+            if (data.ready) {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> <span class="text-emerald-300 font-bold">HP Terhubung (${data.serial})</span>`;
+            } else {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> <span class="text-rose-300">${data.message || 'HP Terputus'}</span>`;
+            }
+            if (data.is_running !== undefined) {
+                setBatchRunningState(data.is_running);
+            }
+        }
+
+        function setBatchRunningState(running) {
+            isBatchRunning = running;
+            const startBtn = document.getElementById('startBatchBtn');
+            const stopBtn = document.getElementById('stopBatchBtn');
+            const overlay = document.getElementById('screenOverlayLoader');
+
+            if (running) {
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+            } else {
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tab) {
+            const folderSec = document.getElementById('folderSection');
+            const uploadSec = document.getElementById('uploadSection');
+            const tabFolderBtn = document.getElementById('tabFolderBtn');
+            const tabUploadBtn = document.getElementById('tabUploadBtn');
+
+            if (tab === 'folder') {
+                folderSec.classList.remove('hidden');
+                uploadSec.classList.add('hidden');
+                tabFolderBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-500 text-white shadow-sm transition flex items-center gap-2';
+                tabUploadBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2';
+            } else {
+                folderSec.classList.add('hidden');
+                uploadSec.classList.remove('hidden');
+                tabUploadBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-500 text-white shadow-sm transition flex items-center gap-2';
+                tabFolderBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2';
+            }
+        }
+
+        async function scanFolder() {
+            const path = document.getElementById('folderPathInput').value.trim();
+            if (!path) return alert('Silakan masukkan path folder.');
+
+            logMessage('info', `Memindai folder: ${path}...`);
+            try {
+                const res = await fetch('/api/scan_folder', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({folder_path: path})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    queue = data.videos.map(v => ({
+                        path: v.path,
+                        filename: v.filename,
+                        size_mb: v.size_mb,
+                        resolution_label: v.resolution_label,
+                        caption: v.suggested_caption,
+                        product: 'https://s.shopee.co.id/AAGOZRQeKC',
+                        status: 'pending'
+                    }));
+                    renderQueue();
+                    updateStats();
+                    logMessage('success', `Berhasil memindai ${data.count} video dari folder!`);
+                } else {
+                    logMessage('error', data.detail || 'Gagal memindai folder.');
+                }
+            } catch (e) {
+                logMessage('error', 'Terjadi kesalahan saat memindai folder.');
+            }
+        }
+
+        async function handleFileUpload(files) {
+            if (!files || files.length === 0) return;
+            logMessage('info', `Mengunggah ${files.length} file video ke server...`);
+
+            for (let i = 0; i < files.length; i++) {
+                const formData = new FormData();
+                formData.append('file', files[i]);
+
+                try {
+                    const res = await fetch('/api/upload_video_file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        addToQueue({
+                            path: data.path,
+                            filename: data.filename,
+                            size_mb: data.size_mb,
+                            resolution_label: data.resolution_label,
+                            caption: data.suggested_caption,
+                            product: 'https://s.shopee.co.id/AAGOZRQeKC',
+                            status: 'pending'
+                        });
+                        logMessage('success', `File '${data.filename}' siap dalam antrean.`);
+                    }
+                } catch (e) {
+                    logMessage('error', `Gagal upload file: ${files[i].name}`);
+                }
+            }
+        }
+
+        function addToQueue(item) {
+            queue.push(item);
+            renderQueue();
+            updateStats();
+        }
+
+        function renderQueue() {
+            const list = document.getElementById('queueList');
+            const countBadge = document.getElementById('queueCountBadge');
+            const empty = document.getElementById('emptyQueueState');
+
+            countBadge.innerText = queue.length;
+            if (queue.length === 0) {
+                list.innerHTML = '';
+                list.appendChild(empty);
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            list.innerHTML = '';
+            queue.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel rounded-2xl p-4 flex flex-col gap-3 transition border border-slate-800/80 hover:border-brand-500/40';
+                
+                let statusHtml = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 text-slate-400 border border-slate-800">Menunggu</span>';
+                if (item.status === 'running') statusHtml = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30 animate-pulse"><i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...</span>';
+                if (item.status === 'success') statusHtml = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"><i class="fa-solid fa-check"></i> Sukses</span>';
+                if (item.status === 'failed') statusHtml = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30"><i class="fa-solid fa-xmark"></i> Gagal</span>';
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-500/20 to-orange-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xs font-bold shrink-0">
+                                #${index + 1}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-slate-200 truncate">${item.filename}</p>
+                                <p class="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5 font-medium">
+                                    <span>${item.size_mb} MB</span> •
+                                    <span class="text-emerald-400">${item.resolution_label}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${statusHtml}
+                            <button onclick="removeQueueItem(${index})" class="text-slate-500 hover:text-rose-400 p-1 text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Caption & Product Link Inputs -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 pt-2.5 border-t border-slate-900">
+                        <div class="md:col-span-7 flex flex-col gap-1">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Keterangan / Caption (Maks 150 Karakter)</label>
+                                <span class="text-[10px] text-slate-500"><span id="charCount_${index}">${item.caption.length}</span>/150</span>
+                            </div>
+                            <textarea rows="2" oninput="updateCaption(${index}, this.value)" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-brand-500 transition custom-scrollbar resize-none placeholder-slate-600" placeholder="Tulis caption & hashtags...">${item.caption}</textarea>
+                        </div>
+                        <div class="md:col-span-5 flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-link text-brand-400"></i> Link Shopee / Keyword Produk
+                            </label>
+                            <input type="text" value="${item.product}" oninput="updateProduct(${index}, this.value)" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-brand-500 transition placeholder-slate-600 font-mono text-[11px]" placeholder="Contoh: https://s.shopee.co.id/... atau nama barang">
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function updateCaption(index, val) {
+            queue[index].caption = val.slice(0, 150);
+            const countElem = document.getElementById(`charCount_${index}`);
+            if (countElem) countElem.innerText = queue[index].caption.length;
+        }
+
+        function updateProduct(index, val) {
+            queue[index].product = val;
+        }
+
+        function removeQueueItem(index) {
+            queue.splice(index, 1);
+            renderQueue();
+            updateStats();
+        }
+
+        function clearQueue() {
+            queue = [];
+            renderQueue();
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').innerText = queue.length;
+            const success = queue.filter(q => q.status === 'success').length;
+            const failed = queue.filter(q => q.status === 'failed').length;
+            const pending = queue.filter(q => q.status === 'pending' || q.status === 'running').length;
+
+            document.getElementById('statSuccess').innerText = success;
+            document.getElementById('statFailed').innerText = failed;
+            document.getElementById('statQueue').innerText = pending;
+        }
+
+        async function startBatchUpload() {
+            if (queue.length === 0) return alert('Silakan tambahkan video ke antrean terlebih dahulu.');
+            if (isBatchRunning) return;
+
+            logMessage('info', `Memulai upload batch ${queue.length} video...`);
+            setBatchRunningState(true);
+
+            try {
+                const res = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({items: queue, delay: 3.0})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    setBatchRunningState(false);
+                    logMessage('error', data.detail || 'Gagal memulai batch.');
+                }
+            } catch (e) {
+                setBatchRunningState(false);
+                logMessage('error', 'Gagal memicu batch upload.');
+            }
+        }
+
+        async function stopBatchUpload() {
+            try {
+                const res = await fetch('/api/batch/stop', {method: 'POST'});
+                const data = await res.json();
+                logMessage('warning', data.message);
+            } catch (e) {
+                logMessage('error', 'Gagal mengirim sinyal stop.');
+            }
+        }
+
+        async function launchScrcpy() {
+            logMessage('info', 'Meluncurkan Scrcpy Mirroring 30 FPS...');
+            try {
+                const res = await fetch('/api/device/launch_scrcpy', {method: 'POST'});
+                const data = await res.json();
+                if (data.success) {
+                    logMessage('success', data.message);
+                    setTimeout(() => {
+                        const img = document.getElementById('liveScreenImg');
+                        img.src = '/api/stream.mjpg?t=' + Date.now();
+                    }, 2000);
+                } else {
+                    logMessage('error', data.error || 'Gagal meluncurkan Scrcpy.');
+                }
+            } catch (e) {
+                logMessage('error', 'Gagal mengirim permintaan Scrcpy.');
+            }
+        }
+
+        async function refreshScreen() {
+            logMessage('info', 'Mengambil screenshot live HP...');
+            try {
+                const res = await fetch('/api/device/screenshot', {method: 'POST'});
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('liveScreenImg').src = data.url;
+                    logMessage('success', 'Screenshot live HP diperbarui.');
+                }
+            } catch (e) {
+                logMessage('error', 'Gagal refresh screen.');
+            }
+        }
+
+        async function reconnectDevice() {
+            logMessage('info', 'Menghubungkan ulang ke HP (192.168.18.101:5555)...');
+            try {
+                const res = await fetch('/api/device/connect', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({serial: '192.168.18.101:5555'})
+                });
+                const data = await res.json();
+                updateDeviceStatus(data);
+                if (data.ready) {
+                    logMessage('success', `Berhasil terhubung ke ${data.serial}`);
+                } else {
+                    logMessage('error', data.message);
+                }
+            } catch (e) {
+                logMessage('error', 'Gagal menghubungkan ke HP.');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            connectWebSocket();
+        });
+    </script>
+</body>
+</html>

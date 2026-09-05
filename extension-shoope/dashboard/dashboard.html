@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee Affiliate Master Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h2>ShopeeAffiliate</h2>
+          <span>Smart Manager</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="products">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Katalog Produk</span>
+          <span class="badge" id="sidebar-count">0</span>
+        </button>
+        <button class="nav-item" data-tab="batch-generator">
+          <span class="nav-icon">🚀</span>
+          <span class="nav-label">Batch 5-in-1 Auto</span>
+          <span class="badge" id="batch-sidebar-count" style="background: #ea580c;">99 Batch</span>
+        </button>
+        <button class="nav-item" data-tab="quick-generator">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label">Quick Generator</span>
+        </button>
+
+        <button class="nav-item" data-tab="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Pengaturan</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="version-tag">v1.3.0 • Manifest V3</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navigation Bar -->
+      <header class="top-bar">
+        <div class="page-title-area">
+          <h1 id="page-title">Katalog & Database Affiliate</h1>
+          <p class="subtitle">Kelola pengelompokan folder, download gambar, dan ekspor link affiliate dengan penomoran urut.</p>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn btn-secondary" id="btn-export-links" title="Export link affiliate dengan judul per folder ke file .txt">
+            <span>🔗 Export Links (.txt)</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-download-all-zip" title="Download semua gambar produk sebagai ZIP">
+            <span>🖼️ Download ZIP</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-export-db-json" title="Download file database.json">
+            <span>📦 database.json</span>
+          </button>
+          <button class="btn btn-primary" id="btn-copy-all-links" title="Salin seluruh link affiliate ke clipboard">
+            <span>📋 Salin Semua Link</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats Overview Cards -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon-wrapper orange">📦</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Produk</span>
+            <strong class="stat-value" id="stat-total">0</strong>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrapper green">✅</div>
+          <div class="stat-info">
+            <span class="stat-label">Link Siap Promosi</span>
+            <strong class="stat-value" id="stat-ready">0</strong>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrapper blue">📁</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Folder</span>
+            <strong class="stat-value" id="stat-folders">0</strong>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrapper purple">🖼️</div>
+          <div class="stat-info">
+            <span class="stat-label">Gambar Siap Unduh</span>
+            <strong class="stat-value" id="stat-images">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 1: Products Database -->
+      <section class="tab-pane active" id="tab-products">
+
+        <!-- Folder Management Pills Bar -->
+        <div class="folder-bar-container">
+          <div class="folder-bar-header">
+            <span class="folder-bar-title">📁 Pengelompokan Folder:</span>
+            <div class="folder-actions-right">
+              <button class="btn-folder-action" id="btn-add-folder">➕ Buat Folder Baru</button>
+              <button class="btn-folder-action secondary" id="btn-manage-folders">⚙️ Kelola Folder</button>
+            </div>
+          </div>
+          <div class="folder-pills-list" id="folder-pills-list">
+            <!-- Dynamic Folder Pills injected here -->
+          </div>
+        </div>
+
+        <!-- Filter & Control Toolbar -->
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Cari nama produk, harga, folder, atau link..." />
+            <button class="clear-search" id="clear-search" style="display:none;">✕</button>
+          </div>
+
+          <div class="toolbar-controls">
+            <select id="filter-status" class="select-input">
+              <option value="all">Semua Status</option>
+              <option value="completed">Siap Promosi (Ada Link)</option>
+              <option value="pending">Pending</option>
+            </select>
+
+            <select id="sort-order" class="select-input" title="Urutan Penomoran & Daftar">
+              <option value="chronological">Urutan: No. 1 (Awal Dibuat) ➔ Akhir</option>
+              <option value="newest">Urutan: Terbaru Dibuat ➔ Terlama</option>
+            </select>
+
+            <div class="view-toggles">
+              <button class="view-btn active" id="btn-view-grid" title="Tampilan Kartu (Grid)">🔲</button>
+              <button class="view-btn" id="btn-view-table" title="Tampilan Tabel (Spreadsheet)">📑</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bulk Selection Bar -->
+        <div class="selection-bar" id="selection-bar">
+          <div class="selection-left">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="select-all-checkbox">
+              <span class="checkmark"></span>
+              <span class="label-text">Pilih Semua Produk</span>
+            </label>
+            <span class="selection-info" id="selection-info">0 item dipilih</span>
+          </div>
+
+          <div class="selection-actions" id="selection-actions" style="display: none;">
+            <div class="move-folder-wrap">
+              <span>Pindah ke:</span>
+              <select id="bulk-folder-select" class="select-input mini">
+                <!-- Injected dynamically -->
+              </select>
+              <button class="btn btn-secondary mini" id="btn-bulk-move-folder">Pindahkan</button>
+            </div>
+            <button class="btn btn-danger-outline mini" id="btn-delete-selected">
+              <span>🗑️ Hapus (<span id="selected-count">0</span>)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Folder Banner (When a specific folder is filtered) -->
+        <div class="active-folder-banner" id="active-folder-banner" style="display:none;">
+          <span id="active-folder-banner-text">Menampilkan Produk di Folder: <strong>Umum</strong></span>
+          <button class="btn-clear-folder-filter" id="btn-clear-folder-filter">Tampilkan Semua Folder ✕</button>
+        </div>
+
+        <!-- Product Grid View -->
+        <div class="products-grid" id="products-grid"></div>
+
+        <!-- Product Table View (Hidden by default) -->
+        <div class="table-container" id="table-container" style="display: none;">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th width="40"><input type="checkbox" id="table-select-all"></th>
+                <th width="70">Gambar</th>
+                <th>Nama Produk & Info</th>
+                <th width="120">Harga</th>
+                <th width="200">Link Affiliate</th>
+                <th width="140">Tanggal</th>
+                <th width="160">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls (Default 20 Produk Per Halaman) -->
+        <div class="pagination-container" id="pagination-container" style="display: none;">
+          <div class="pagination-info" id="pagination-info">
+            Menampilkan <strong id="page-start">1</strong>-<strong id="page-end">20</strong> dari <strong id="page-total">0</strong> produk
+          </div>
+
+          <div class="pagination-controls">
+            <button class="btn-page-nav" id="btn-page-first" title="Halaman Pertama">⏮</button>
+            <button class="btn-page-nav" id="btn-page-prev" title="Halaman Sebelumnya">◀</button>
+            <div class="page-numbers" id="page-numbers"></div>
+            <button class="btn-page-nav" id="btn-page-next" title="Halaman Berikutnya">▶</button>
+            <button class="btn-page-nav" id="btn-page-last" title="Halaman Terakhir">⏭</button>
+          </div>
+
+          <div class="pagination-per-page">
+            <span>Per halaman:</span>
+            <select id="select-per-page" class="select-input mini">
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all">Semua</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <div class="empty-icon">🛍️</div>
+          <h3>Belum Ada Produk Tersimpan</h3>
+          <p>Buka halaman produk di Shopee dan klik tombol <strong>⚡ Generate Affiliate Link</strong> pada widget atau popup ekstensi.</p>
+        </div>
+      </section>
+
+      <!-- Tab 2: Batch 5-in-1 Auto Generator (Super Converter) -->
+      <section class="tab-pane" id="tab-batch-generator">
+        <div class="panel-card" style="border: 1px solid rgba(234, 88, 12, 0.4); background: linear-gradient(180deg, rgba(234, 88, 12, 0.04), transparent);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h2 style="color: #ea580c; display: flex; align-items: center; gap: 8px;">
+                <span>🚀 Batch 5-in-1 Auto Link Generator (No. 101 - 200)</span>
+              </h2>
+              <p class="panel-desc">Generate massal ratusan link produk Shopee secara otomatis dalam batch 5 link per putaran dengan delay anti-bot.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" id="btn-load-bundled-links" style="background: #ea580c; border-color: #ea580c;">
+                <span>📂 Muat Otomatis 500 Link (No. 101-200)</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-clear-batch-input">
+                <span>🧹 Bersihkan</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top: 15px; margin-bottom: 5px;">
+            <div class="form-group col" style="margin-bottom: 0;">
+              <label for="dashboard-range-select">Pilih Paket Link (100 Link / 500 Link):</label>
+              <select id="dashboard-range-select" class="select-input" style="width: 100%; color: #38bdf8; font-weight: 700; background: #1e293b;">
+                <option value="part1">⚡ Bagian 1 (No. 101 - 120 = 100 Link / 20 Putaran)</option>
+                <option value="part2">⚡ Bagian 2 (No. 121 - 140 = 100 Link / 20 Putaran)</option>
+                <option value="part3">⚡ Bagian 3 (No. 141 - 160 = 100 Link / 20 Putaran)</option>
+                <option value="part4">⚡ Bagian 4 (No. 161 - 180 = 100 Link / 20 Putaran)</option>
+                <option value="part5">⚡ Bagian 5 (No. 181 - 200 = 100 Link / 20 Putaran)</option>
+                <option value="all" selected>🚀 Semua 500 Link (No. 101 - 200 = 100 Putaran)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 10px;">
+            <label for="batch-urls-input" style="display: flex; justify-content: space-between;">
+              <span>Daftar URL Produk Shopee (1 baris per link):</span>
+              <strong id="batch-stats-indicator" style="color: #38bdf8;">0 Link terdeteksi (0 Batch)</strong>
+            </label>
+            <textarea id="batch-urls-input" rows="8" placeholder="Paste link produk Shopee di sini (1 baris per link)..." style="font-family: monospace; font-size: 0.85rem; line-height: 1.5;"></textarea>
+          </div>
+
+          <!-- Controls & Settings -->
+          <div class="form-row" style="align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 15px;">
+            <div class="form-group col" style="margin-bottom: 0;">
+              <label for="batch-delay-input">Delay per Batch (Detik):</label>
+              <input type="number" id="batch-delay-input" value="3" min="1" max="10" style="width: 100%;">
+            </div>
+            <div class="form-group col" style="margin-bottom: 0;">
+              <label>Link per Putaran:</label>
+              <input type="text" value="5 Link (Maksimal Shopee Portal)" disabled style="width: 100%; opacity: 0.8;">
+            </div>
+            <div class="form-group col" style="margin-bottom: 0; display: flex; align-items: flex-end; gap: 8px;">
+              <button class="btn btn-primary" id="btn-start-batch" style="flex: 1; background: #10b981; border-color: #10b981; height: 38px;">
+                <span>▶️ Mulai Auto Generate</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-pause-batch" style="height: 38px; display: none;">
+                <span>⏸️ Pause</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-reset-batch" style="height: 38px;">
+                <span>⏹️ Reset</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Progress Box -->
+          <div id="batch-progress-box" style="background: #0d1322; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 14px; margin-bottom: 15px; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span id="batch-progress-title" style="font-weight: 700; font-size: 0.9rem; color: #38bdf8;">Sedang Memproses...</span>
+              <span id="batch-progress-pct" style="font-weight: 800; font-size: 0.9rem; color: #fff;">0%</span>
+            </div>
+            <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-bottom: 10px;">
+              <div id="batch-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ea580c, #38bdf8); transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display: flex; gap: 15px; font-size: 0.8rem; color: var(--text-muted);">
+              <span>Batch: <strong id="batch-curr-idx" style="color:#fff;">0</strong> / <strong id="batch-total-idx">0</strong></span>
+              <span>✅ Sukses: <strong id="batch-success-count" style="color:#10b981;">0</strong></span>
+              <span>❌ Gagal: <strong id="batch-fail-count" style="color:#f43f5e;">0</strong></span>
+            </div>
+          </div>
+
+          <!-- Actions on Result -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+            <h3 style="font-size: 0.95rem; font-weight: 700;">Hasil Konversi (<span id="batch-results-count">0</span> Selesai)</h3>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" id="btn-copy-batch-results" title="Salin semua shortlink affiliate">
+                <span>📋 Salin Link (.txt)</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-export-batch-json" title="Download database JSON">
+                <span>📦 Export JSON</span>
+              </button>
+              <button class="btn btn-primary" id="btn-sync-to-biolink" style="background: #38bdf8; border-color: #38bdf8; color: #070a12; font-weight: 800;" title="Kirim & perbarui data ke Bio Link shop otomatis!">
+                <span>💾 Sinkronkan ke Bio-Link</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Table -->
+          <div class="table-container" style="max-height: 340px; overflow-y: auto; margin-top: 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">No</th>
+                  <th style="width: 70px;">Spill #</th>
+                  <th style="width: 70px;">Toko</th>
+                  <th>URL Asli</th>
+                  <th>Link Affiliate (s.shopee.co.id)</th>
+                  <th style="width: 70px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="batch-results-tbody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 25px;">Belum ada link yang diproses. Klik "Muat Otomatis 495 Link" lalu "Mulai Auto Generate".</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 3: Quick Generator -->
+      <section class="tab-pane" id="tab-quick-generator">
+        <div class="panel-card">
+          <h2>⚡ Manual / Quick Link Generator</h2>
+          <p class="panel-desc">Paste link produk Shopee mana saja di sini untuk langsung meng-generate custom affiliate link.</p>
+          
+          <div class="form-group">
+            <label for="manual-url-input">URL Produk Shopee:</label>
+            <textarea id="manual-url-input" rows="3" placeholder="https://shopee.co.id/nama-produk-i.123456.789012..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="manual-tag-1">Sub-tag 1 (Opsional):</label>
+              <input type="text" id="manual-tag-1" placeholder="Contoh: TikTokReels">
+            </div>
+            <div class="form-group col">
+              <label for="manual-tag-2">Sub-tag 2 (Opsional):</label>
+              <input type="text" id="manual-tag-2" placeholder="Contoh: PromoAgustus">
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="btn-manual-generate">
+            <span>🚀 Generate Link Sekarang</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tab 4: Settings -->
+      <section class="tab-pane" id="tab-settings">
+        <div class="panel-card">
+          <h2>⚙️ Pengaturan Ekstensi</h2>
+          <p class="panel-desc">Atur perilaku otomatisasi dan preferensi sistem ekstensi.</p>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <strong>Otomatis Download Gambar Pertama</strong>
+              <p>Download otomatis foto produk utama ketika tombol Generate diklik.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-auto-download-img">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <strong>Otomatis Tutup Tab Affiliate Setelah Sukses</strong>
+              <p>Tutup tab <code>affiliate.shopee.co.id</code> otomatis 1.5 detik setelah link selesai dibuat.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-auto-close-tab">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <strong>Otomatis Buka Dashboard Setelah Link Jadi</strong>
+              <p>Buka halaman dashboard ini otomatis setelah link affiliate baru selesai digenerate.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-auto-open-dash">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: 20px;">
+            <label for="setting-default-tag1">Default Sub-tag 1 Shopee:</label>
+            <input type="text" id="setting-default-tag1" placeholder="Kosongkan jika tidak memakai tag otomatis">
+          </div>
+
+          <div class="form-group">
+            <label for="setting-default-tag2">Default Sub-tag 2 Shopee:</label>
+            <input type="text" id="setting-default-tag2" placeholder="Kosongkan jika tidak memakai tag otomatis">
+          </div>
+
+          <!-- Backup & Restore Database Section -->
+          <div class="setting-backup-box" style="margin-top: 24px; padding: 18px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+            <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">📦 Backup & Restore File database.json</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Simpan cadangan database ke file <code>database.json</code> atau impor file database dari komputer Anda:</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="btn-settings-export-json">
+                <span>📥 Unduh database.json</span>
+              </button>
+              <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
+                <span>📤 Impor database.json</span>
+                <input type="file" id="input-import-json-file" accept=".json" style="display: none;" />
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-danger-zone">
+            <h3>⚠️ Zona Berbahaya</h3>
+            <p>Hapus seluruh riwayat produk yang tersimpan di database lokal.</p>
+            <button class="btn btn-danger" id="btn-clear-all-data">
+              <span>🗑️ Bersihkan Seluruh Database</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: Buat Folder Baru -->
+  <div class="modal-overlay" id="modal-create-folder" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📁 Buat Folder Baru</h3>
+        <button class="modal-close" id="btn-close-create-folder-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Beri nama folder untuk mengelompokkan link affiliate Anda (misal: <em>Elektronik, Fashion, Dapur, Promo TikTok</em>):</p>
+        <div class="form-group">
+          <input type="text" id="input-new-folder-name" class="modal-input" placeholder="Masukkan nama folder..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-create-folder">Batal</button>
+        <button class="btn btn-primary" id="btn-confirm-create-folder">Simpan Folder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Kelola Folder -->
+  <div class="modal-overlay" id="modal-manage-folders" style="display:none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>⚙️ Kelola Daftar Folder</h3>
+        <button class="modal-close" id="btn-close-manage-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Kelola nama folder atau hapus folder yang tidak digunakan. Produk di folder yang dihapus akan otomatis dipindahkan ke folder <strong>Umum</strong>.</p>
+        <div class="manage-folders-list" id="manage-folders-list">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-done-manage-folders">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="../utils/jszip.min.js"></script>
+  <script src="../utils/storage.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

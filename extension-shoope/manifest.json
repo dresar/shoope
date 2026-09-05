@@ -1,0 +1,75 @@
+{
+  "manifest_version": 3,
+  "name": "Shopee Affiliate Smart Auto Link & Image Extractor",
+  "version": "1.4.0",
+  "description": "Ekstensi affiliate Shopee: generate link otomatis, multi-folder 1-10, penomoran urut kronologis, dan ekspor link rapi. v1.4.0",
+  "permissions": [
+    "storage",
+    "downloads",
+    "tabs",
+    "activeTab",
+    "clipboardWrite",
+    "notifications",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "*://*.shopee.co.id/*",
+    "*://affiliate.shopee.co.id/*",
+    "*://*.shopeemobile.com/*",
+    "*://*.s.shopee.co.id/*",
+    "*://*.susercontent.com/*",
+    "*://*.img.susercontent.com/*",
+    "*://down-id.img.susercontent.com/*",
+    "*://*.shopee.com/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_title": "Shopee Affiliate Assistant",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "dashboard/dashboard.html"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://shopee.co.id/*",
+        "*://*.shopee.co.id/*"
+      ],
+      "exclude_matches": [
+        "*://affiliate.shopee.co.id/*",
+        "*://seller.shopee.co.id/*"
+      ],
+      "js": ["utils/storage.js", "content-scripts/shopee-product.js"],
+      "css": ["content-scripts/shopee-product.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://affiliate.shopee.co.id/offer/custom_link*",
+        "*://affiliate.shopee.co.id/offer/custom_link"
+      ],
+      "js": ["utils/storage.js", "utils/links_data.js", "content-scripts/shopee-affiliate.js"],
+      "css": ["content-scripts/shopee-affiliate.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["database.json", "icons/*", "dashboard/*"],
+      "matches": ["*://*.shopee.co.id/*"]
+    }
+  ]
+}
